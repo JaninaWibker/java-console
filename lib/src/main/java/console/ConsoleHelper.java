@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+// TODO: implement skip_getter_setter
 public class ConsoleHelper {
 
     private enum Action {
