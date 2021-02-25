@@ -9,9 +9,23 @@ import java.io.PrintStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import console.Console.SkipDescend;
+import console.Console.SkipEntirely;
+import console.Console.UseToString;
+
 import static org.junit.Assert.*;
 
 public class ConsoleTest {
+
+    /**
+     * VSCode doesn't output stdout when runnings tests anywhere, only stderr.
+     * Using this you can toggle printing to stderr as well as stdout
+     * This uses the "s_" prefixed methods, if for some reason a discrepancy
+     * between the normal methods and the "s_" methods exists you wouldn't be
+     * able to notice it using this.
+     */
+    private static final boolean ALSO_PRINT_TO_STDERR = true;
 
     private class A {
         private String first_name;
@@ -37,6 +51,11 @@ public class ConsoleTest {
         public String get_last_name() {
             return this.last_name;
         }
+
+        @Override
+        public String toString() {
+            return this.first_name + " " + this.last_name;
+        }
     }
 
     private class B {
@@ -48,16 +67,28 @@ public class ConsoleTest {
     }
 
     private class C {
+        @SkipDescend
+        private A a1 = new A("first", "last");
 
+        @SkipEntirely
+        private A a2 = new A("first", "last");
+
+        @UseToString
+        private A a3 = new A("first", "last");
+
+        @SkipEntirely
+        public A a() {
+            return this.a1;
+        }
     }
 
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream out_content = new ByteArrayOutputStream();
 
     private final PrintStream originalOut = System.out;
 
     @Before
     public void set_up_streams() {
-        System.setOut(new PrintStream(outContent));
+        System.setOut(new PrintStream(this.out_content));
     }
 
     @After
@@ -78,9 +109,49 @@ public class ConsoleTest {
 
         Console.log(opts, a);
 
+        if(ConsoleTest.ALSO_PRINT_TO_STDERR) { System.err.println(Console.s_log(opts, a)); }
+
         assertEquals(
-            outContent.toString(),
+            this.out_content.toString(),
             "[LOG] A {\n  -first_name: String = \"first\"\n  -last_name: String = \"last\"\n}\n"
+        );
+    }
+
+    @Test
+    public void annotations_fields() {
+        ConsoleOptions opts = new ConsoleOptions()
+            .short_names(true)
+            .skip_enclosing_scope(true)
+            .timestamp(false)
+            .colors(false)
+            .methods(false);
+
+        Console.log(opts, new C());
+
+        if(ConsoleTest.ALSO_PRINT_TO_STDERR) { System.err.println(Console.s_log(opts, new C())); }
+
+        assertEquals(
+            this.out_content.toString(),
+            "[LOG] C {\n  -a1: A = <not descending>\n  -a3: A = \"first last\"\n}\n"
+        );
+    }
+
+    @Test
+    public void annotations_methods() {
+        ConsoleOptions opts = new ConsoleOptions()
+            .short_names(true)
+            .skip_enclosing_scope(true)
+            .timestamp(false)
+            .colors(false)
+            .methods(true);
+
+        Console.log(opts, new C());
+
+        if(ConsoleTest.ALSO_PRINT_TO_STDERR) { System.err.println(Console.s_log(opts, new C())); }
+
+        assertEquals(
+            this.out_content.toString(),
+            "[LOG] C {\n  -a1: A = <not descending>\n  -a3: A = \"first last\"\n}\n"
         );
     }
 }

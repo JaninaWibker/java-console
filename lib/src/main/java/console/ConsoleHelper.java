@@ -118,6 +118,11 @@ public class ConsoleHelper {
             this.visited.add(hash);
         }
 
+        String serialized = this.serialize_known_types(field_value);
+
+        if(serialized != null && action != Action.SKIP) {
+            action = Action.TO_STRING;
+        }
 
         if(p.value.getAnnotation(Console.SkipDescend.class) != null) {
             action = Action.NO_DESCEND;
@@ -129,12 +134,7 @@ public class ConsoleHelper {
 
         if(p.value.getAnnotation(Console.UseToString.class) != null) {
             action = Action.TO_STRING;
-        }
-
-        String serialized = this.serialize_known_types(field_value);
-
-        if(serialized != null && action != Action.SKIP) {
-            action = Action.TO_STRING;
+            serialized = "\"" + field_value.toString() + "\"";
         }
 
         if(p.value.getName().startsWith("this$")) {
@@ -172,10 +172,19 @@ public class ConsoleHelper {
     public String method(Method m, int indent) {
         String str = "";
         for(int i =0; i < indent; i++) { str += " "; }
-        return str + this.method(m);
+        String m_str = this.method(m);
+
+        return m_str == null
+            ? null
+            : str + m_str;
     }
 
     public String method(Method m) {
+
+        // check the SkipEntirely annotation (all other annotations make no sense for methods)
+        if(m.getAnnotation(Console.SkipEntirely.class) != null) {
+            return null;
+        }
 
         String[] ret_type_split = m.getReturnType().getName().split("\\.");
         String return_type = Pair.fromArray(ret_type_split)
@@ -248,9 +257,10 @@ public class ConsoleHelper {
 
         String methods = Arrays.stream(c.getDeclaredMethods())
             .map(this::method)
+            .filter(str -> str != null)
             .collect(ConsoleHelper.newline);
 
-        if(this.options.methods && !this.options.json) {
+        if(this.options.methods && !this.options.json && !methods.equals("")) {
             return this.wrap_class(c, fields + "\n\n" + methods);
         } else {
             return this.wrap_class(c, fields);
