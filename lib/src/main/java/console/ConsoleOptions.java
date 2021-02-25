@@ -305,6 +305,33 @@ public class ConsoleOptions {
         return this;
     }
 
+    /**
+     * Set indent to supplied value in the **current** ConsoleOptions object.
+     * WARNING: this is NOT immutable
+     */
+    public ConsoleOptions indent(int indent) {
+        this.indent = indent;
+        return this;
+    }
+
+    /**
+     * Set depth to supplied value in the **current** ConsoleOptions object.
+     * WARNING: this is NOT immutable
+     */
+    public ConsoleOptions depth(int depth) {
+        this.depth = depth;
+        return this;
+    }
+
+    /**
+     * Set dateformat to supplied value in the **current** ConsoleOptions object.
+     * WARNING: this is NOT immutable
+     */
+    public ConsoleOptions dateformat(SimpleDateFormat dateformat) {
+        this.dateformat = dateformat;
+        return this;
+    }
+
     /** Copy the current ConsoleOptions object and create a new one */
     public ConsoleOptions copy() {
         return ConsoleOptions.from(this);
