@@ -3,9 +3,84 @@
  */
 package console;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class ConsoleTest {
-    // TODO: add some tests here
+
+    private class A {
+        private String first_name;
+        private String last_name;
+
+        public A(String first_name, String last_name) {
+            this.first_name = first_name;
+            this.last_name  = last_name;
+        }
+
+        public void set_first_name(String first_name) {
+            this.first_name = first_name;
+        }
+
+        public void set_last_name(String last_name) {
+            this.last_name = last_name;
+        }
+
+        public String get_first_name() {
+            return this.first_name;
+        }
+
+        public String get_last_name() {
+            return this.last_name;
+        }
+    }
+
+    private class B {
+        private final B b;
+
+        public B() {
+            this.b = this;
+        }
+    }
+
+    private class C {
+
+    }
+
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+
+    private final PrintStream originalOut = System.out;
+
+    @Before
+    public void set_up_streams() {
+        System.setOut(new PrintStream(outContent));
+    }
+
+    @After
+    public void restore_streams() {
+        System.setOut(originalOut);
+    }
+
+    @Test
+    public void basic_functionality() {
+        ConsoleOptions opts = new ConsoleOptions()
+            .short_names(true)
+            .skip_enclosing_scope(true)
+            .timestamp(false)
+            .colors(false)
+            .methods(false);
+
+        A a = new A("first", "last");
+
+        Console.log(opts, a);
+
+        assertEquals(
+            outContent.toString(),
+            "[LOG] A {\n  -first_name: String = \"first\"\n  -last_name: String = \"last\"\n}\n"
+        );
+    }
 }

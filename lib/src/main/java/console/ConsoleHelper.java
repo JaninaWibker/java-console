@@ -137,7 +137,9 @@ public class ConsoleHelper {
         }
 
         if(p.value.getName().startsWith("this$")) {
-            action = Action.NO_DESCEND;
+            action = this.options.skip_enclosing_scope
+                ? Action.SKIP
+                : Action.NO_DESCEND;
         }
 
         if(depth == 0) {
@@ -149,8 +151,8 @@ public class ConsoleHelper {
                 case DESCEND:           return p.key + ": " + this.string_log_single(field_value, depth-1);
                 case NO_DESCEND:        return p.key + ": " + "\"<not descending>\",";
                 case TO_STRING:         return p.key + ": " + serialized + ",";
-                case SKIP:              return p.key + ": " + null + ",";
                 case SKIP_RESURSIVE:    return p.key + ": " + "\"<recursive>\",";
+                case SKIP:              return null;
                 default:                return "";
             }
         } else {
@@ -158,8 +160,8 @@ public class ConsoleHelper {
                 case DESCEND:           return p.key + " = " + this.string_log_single(field_value, depth-1);
                 case NO_DESCEND:        return p.key + " = " + "<not descending>";
                 case TO_STRING:         return p.key + " = " + serialized;
-                case SKIP:              return p.key + " = " + null;
                 case SKIP_RESURSIVE:    return p.key + " = " + "<recursive>";
+                case SKIP:              return null;
                 default:                return "";
             }
         }
