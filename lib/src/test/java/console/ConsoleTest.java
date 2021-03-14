@@ -83,8 +83,15 @@ public class ConsoleTest {
     }
 
     private class D {
-        private int[] ia = { 1, 2, 3 };
         private String[] is = { "foo", "bar" };
+    }
+
+    private class E {
+        private int[] ia = { 1, 2, 3 };
+    }
+
+    private class F {
+        private String[] is_with_newlines = { "foo\n", "b\nar" };
     }
 
     private final ByteArrayOutputStream out_content = new ByteArrayOutputStream();
@@ -161,7 +168,7 @@ public class ConsoleTest {
     }
 
     @Test
-    public void basic_arrays() {
+    public void object_arrays() {
         ConsoleOptions opts = new ConsoleOptions()
             .short_names(true)
             .skip_enclosing_scope(true)
@@ -174,7 +181,45 @@ public class ConsoleTest {
         if(ConsoleTest.ALSO_PRINT_TO_STDERR) { System.err.println(Console.s_log(opts, new D())); }
 
         assertEquals(
-            "[LOG] D {\n  -ia: int[] = [1, 2, 3]\n  -is: String[] = [\"foo\", \"bar\"]\n}\n",
+            "[LOG] D {\n  -is: String[] = [\"foo\", \"bar\"]\n}\n",
+            this.out_content.toString()
+        );
+    }
+
+    @Test
+    public void primitive_arrays() {
+        ConsoleOptions opts = new ConsoleOptions()
+            .short_names(true)
+            .skip_enclosing_scope(true)
+            .timestamp(false)
+            .colors(false)
+            .methods(true);
+
+        Console.log(opts, new E());
+
+        if(ConsoleTest.ALSO_PRINT_TO_STDERR) { System.err.println(Console.s_log(opts, new E())); }
+
+        assertEquals(
+            "[LOG] E {\n  -ia: int[] = [1, 2, 3]\n}\n",
+            this.out_content.toString()
+        );
+    }
+
+    @Test
+    public void multiline_arrays() {
+        ConsoleOptions opts = new ConsoleOptions()
+            .short_names(true)
+            .skip_enclosing_scope(true)
+            .timestamp(false)
+            .colors(false)
+            .methods(true);
+
+        Console.log(opts, new F());
+
+        if(ConsoleTest.ALSO_PRINT_TO_STDERR) { System.err.println(Console.s_log(opts, new F())); }
+
+        assertEquals(
+            "[LOG] F {\n  -is_with_newlines: String[] = [\n    \"foo\n    \",\n    \"b\n    ar\"\n  ]\n}\n",
             this.out_content.toString()
         );
     }

@@ -216,10 +216,30 @@ public class ConsoleHelper {
     public String array(Pair<String, Field> p, Object v, int depth) {
         Object[] a = this.autobox(v);
 
-        Stream<String> rtn = Arrays.stream(a)
+        Stream<String> values = Arrays.stream(a)
             .map((Object o) -> this.string_log_single(o, depth-1));
 
-        return "[" + rtn.collect(ConsoleHelper.comma) + "]";
+        boolean[] found_arr = { false };
+
+        Arrays.stream(a)
+            .map((Object o) -> this.string_log_single(o, depth-1))
+            .forEach((String s) -> {
+                if(s.contains("\n") || s.length() > 256) found_arr[0] = true;
+            });
+
+        boolean use_newlines = found_arr[0];
+
+        String rtn = values
+            .map((String s) -> use_newlines ? s.replace("\n", "\n  ") : s)
+            .collect(Collectors.joining(use_newlines ? ",\n  " : ", "));
+
+        return (
+            "[" +
+            (use_newlines ? "\n  " : "") +
+            rtn +
+            (use_newlines ? "\n" : "") +
+            "]"
+        );
     }
 
     public String method(Method m, int indent) {
