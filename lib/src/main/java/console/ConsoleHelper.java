@@ -2,9 +2,11 @@ package console;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // TODO: implement skip_getter_setter
 public class ConsoleHelper {
@@ -13,6 +15,7 @@ public class ConsoleHelper {
         DESCEND,
         NO_DESCEND,
         TO_STRING,
+        ARRAY,
         SKIP,
         SKIP_RESURSIVE,
     }
@@ -27,6 +30,17 @@ public class ConsoleHelper {
     private static final Collector<CharSequence, ?, String> dot = Collectors.joining(".");
 
     private ConsoleOptions options;
+
+    private static final Map<Class<?>, Class<?>> PRIMITIVES = Map.of(
+        Byte.TYPE,      Byte.class,
+        Short.TYPE,     Short.class,
+        Integer.TYPE,   Integer.class,
+        Long.TYPE,      Long.class,
+        Float.TYPE,     Float.class,
+        Double.TYPE,    Double.class,
+        Character.TYPE, Character.class,
+        Boolean.TYPE,   Boolean.class
+    );
 
     private ArrayList<Integer> visited = new ArrayList<>();
 
@@ -112,6 +126,8 @@ public class ConsoleHelper {
 
         int hash = System.identityHashCode(field_value);
 
+        boolean is_array = p.value.getType().isArray();
+
         if(this.visited.contains(hash)) {
             action = Action.SKIP_RESURSIVE;
         } else {
@@ -137,6 +153,10 @@ public class ConsoleHelper {
             serialized = "\"" + field_value.toString() + "\"";
         }
 
+        if(is_array) {
+            action = Action.ARRAY;
+        }
+
         if(p.value.getName().startsWith("this$")) {
             action = this.options.skip_enclosing_scope
                 ? Action.SKIP
@@ -152,6 +172,7 @@ public class ConsoleHelper {
                 case DESCEND:           return p.key + ": " + this.string_log_single(field_value, depth-1);
                 case NO_DESCEND:        return p.key + ": " + "\"<not descending>\",";
                 case TO_STRING:         return p.key + ": " + serialized + ",";
+                case ARRAY:             return p.key + ": " + this.array(p, o, depth) + ",";
                 case SKIP_RESURSIVE:    return p.key + ": " + "\"<recursive>\",";
                 case SKIP:              return null;
                 default:                return "";
@@ -161,12 +182,44 @@ public class ConsoleHelper {
                 case DESCEND:           return p.key + " = " + this.string_log_single(field_value, depth-1);
                 case NO_DESCEND:        return p.key + " = " + "<not descending>";
                 case TO_STRING:         return p.key + " = " + serialized;
+                case ARRAY:             return p.key + " = " + this.array(p, field_value, depth);
                 case SKIP_RESURSIVE:    return p.key + " = " + "<recursive>";
                 case SKIP:              return null;
                 default:                return "";
             }
         }
+    }
 
+    public Object[] autobox(Object v) {
+        Class<?> component_type = v.getClass().getComponentType();
+        if(ConsoleHelper.PRIMITIVES.containsKey(component_type)) {
+            Class<?> autoboxed = ConsoleHelper.PRIMITIVES.get(component_type);
+            Object[] new_array;
+            // sadly not possible to do this super repetetive thing in a more /generic/ way :(
+            switch(autoboxed.getName()) {
+                case "java.lang.Byte":        { byte[]    old_array = (byte[]) v;     new_array = (Object[]) Array.newInstance(autoboxed, old_array.length); for(int i = 0; i < old_array.length; i++) { new_array[i] = old_array[i]; } } break;
+                case "java.lang.Short":       { short[]   old_array = (short[]) v;    new_array = (Object[]) Array.newInstance(autoboxed, old_array.length); for(int i = 0; i < old_array.length; i++) { new_array[i] = old_array[i]; } } break;
+                case "java.lang.Integer":     { int[]     old_array = (int[]) v;      new_array = (Object[]) Array.newInstance(autoboxed, old_array.length); for(int i = 0; i < old_array.length; i++) { new_array[i] = old_array[i]; } } break;
+                case "java.lang.Long":        { long[]    old_array = (long[]) v;     new_array = (Object[]) Array.newInstance(autoboxed, old_array.length); for(int i = 0; i < old_array.length; i++) { new_array[i] = old_array[i]; } } break;
+                case "java.lang.Float":       { float[]   old_array = (float[]) v;    new_array = (Object[]) Array.newInstance(autoboxed, old_array.length); for(int i = 0; i < old_array.length; i++) { new_array[i] = old_array[i]; } } break;
+                case "java.lang.Double":      { double[]  old_array = (double[]) v;   new_array = (Object[]) Array.newInstance(autoboxed, old_array.length); for(int i = 0; i < old_array.length; i++) { new_array[i] = old_array[i]; } } break;
+                case "java.lang.Character":   { char[]    old_array = (char[]) v;     new_array = (Object[]) Array.newInstance(autoboxed, old_array.length); for(int i = 0; i < old_array.length; i++) { new_array[i] = old_array[i]; } } break;
+                case "java.lang.Boolean":     { boolean[] old_array = (boolean[]) v;  new_array = (Object[]) Array.newInstance(autoboxed, old_array.length); for(int i = 0; i < old_array.length; i++) { new_array[i] = old_array[i]; } } break;
+                default: throw new RuntimeException("A new primitive type must have been added which needs to be considered");
+            }
+            return new_array;
+        } else {
+            return (Object[]) v;
+        }
+    }
+
+    public String array(Pair<String, Field> p, Object v, int depth) {
+        Object[] a = this.autobox(v);
+
+        Stream<String> rtn = Arrays.stream(a)
+            .map((Object o) -> this.string_log_single(o, depth-1));
+
+        return "[" + rtn.collect(ConsoleHelper.comma) + "]";
     }
 
     public String method(Method m, int indent) {

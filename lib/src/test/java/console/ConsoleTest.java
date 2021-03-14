@@ -82,6 +82,11 @@ public class ConsoleTest {
         }
     }
 
+    private class D {
+        private int[] ia = { 1, 2, 3 };
+        private String[] is = { "foo", "bar" };
+    }
+
     private final ByteArrayOutputStream out_content = new ByteArrayOutputStream();
 
     private final PrintStream originalOut = System.out;
@@ -112,8 +117,8 @@ public class ConsoleTest {
         if(ConsoleTest.ALSO_PRINT_TO_STDERR) { System.err.println(Console.s_log(opts, a)); }
 
         assertEquals(
-            this.out_content.toString(),
-            "[LOG] A {\n  -first_name: String = \"first\"\n  -last_name: String = \"last\"\n}\n"
+            "[LOG] A {\n  -first_name: String = \"first\"\n  -last_name: String = \"last\"\n}\n",
+            this.out_content.toString()
         );
     }
 
@@ -131,8 +136,8 @@ public class ConsoleTest {
         if(ConsoleTest.ALSO_PRINT_TO_STDERR) { System.err.println(Console.s_log(opts, new C())); }
 
         assertEquals(
-            this.out_content.toString(),
-            "[LOG] C {\n  -a1: A = <not descending>\n  -a3: A = \"first last\"\n}\n"
+            "[LOG] C {\n  -a1: A = <not descending>\n  -a3: A = \"first last\"\n}\n",
+            this.out_content.toString()
         );
     }
 
@@ -150,8 +155,27 @@ public class ConsoleTest {
         if(ConsoleTest.ALSO_PRINT_TO_STDERR) { System.err.println(Console.s_log(opts, new C())); }
 
         assertEquals(
-            this.out_content.toString(),
-            "[LOG] C {\n  -a1: A = <not descending>\n  -a3: A = \"first last\"\n}\n"
+            "[LOG] C {\n  -a1: A = <not descending>\n  -a3: A = \"first last\"\n}\n",
+            this.out_content.toString()
+        );
+    }
+
+    @Test
+    public void basic_arrays() {
+        ConsoleOptions opts = new ConsoleOptions()
+            .short_names(true)
+            .skip_enclosing_scope(true)
+            .timestamp(false)
+            .colors(false)
+            .methods(true);
+
+        Console.log(opts, new D());
+
+        if(ConsoleTest.ALSO_PRINT_TO_STDERR) { System.err.println(Console.s_log(opts, new D())); }
+
+        assertEquals(
+            "[LOG] D {\n  -ia: int[] = [1, 2, 3]\n  -is: String[] = [\"foo\", \"bar\"]\n}\n",
+            this.out_content.toString()
         );
     }
 }
