@@ -3,6 +3,7 @@ package console;
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -31,16 +32,17 @@ public class ConsoleHelper {
 
     private ConsoleOptions options;
 
-    private static final Map<Class<?>, Class<?>> PRIMITIVES = Map.of(
-        Byte.TYPE,      Byte.class,
-        Short.TYPE,     Short.class,
-        Integer.TYPE,   Integer.class,
-        Long.TYPE,      Long.class,
-        Float.TYPE,     Float.class,
-        Double.TYPE,    Double.class,
-        Character.TYPE, Character.class,
-        Boolean.TYPE,   Boolean.class
-    );
+    private static final Map<Class<?>, Class<?>> PRIMITIVES = new HashMap<Class<?>, Class<?>>();
+    {
+        PRIMITIVES.put(Byte.TYPE,      Byte.class);
+        PRIMITIVES.put(Short.TYPE,     Short.class);
+        PRIMITIVES.put(Integer.TYPE,   Integer.class);
+        PRIMITIVES.put(Long.TYPE,      Long.class);
+        PRIMITIVES.put(Float.TYPE,     Float.class);
+        PRIMITIVES.put(Double.TYPE,    Double.class);
+        PRIMITIVES.put(Character.TYPE, Character.class);
+        PRIMITIVES.put(Boolean.TYPE,   Boolean.class);
+    }
 
     private ArrayList<Integer> visited = new ArrayList<>();
 
