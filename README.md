@@ -9,7 +9,48 @@ Reflections allow inspection of objects so why not use it to build a *good* logg
 
 ## Installation
 
-TODO
+
+Use [jitpack.io](https://jitpack.io) to include this project.
+
+### Gradle
+
+Add repository (root `build.gradle` file)
+
+```gradle
+repositories {
+  ...
+  maven { url 'https://jitpack.io' }
+}
+```
+
+and add the dependency
+
+```gradle
+dependencies {
+  implementation 'com.github.jannikwibker:java-console:master-SNAPSHOT'
+}
+```
+
+### Maven
+
+Add repository
+
+```xml
+<repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+</repository>
+```
+
+and add the dependency
+
+```xml
+<dependency>
+  <groupId>com.github.jannikwibker</groupId>
+  <artifactId>java-console</artifactId>
+  <version>master-SNAPSHOT</version>
+</dependency>
+```
 
 ## Usage
 
