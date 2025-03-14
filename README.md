@@ -27,7 +27,7 @@ and add the dependency
 
 ```gradle
 dependencies {
-  implementation 'com.github.jannikwibker:java-console:master-SNAPSHOT'
+  implementation 'com.github.janinawibker:java-console:master-SNAPSHOT'
 }
 ```
 
@@ -46,7 +46,7 @@ and add the dependency
 
 ```xml
 <dependency>
-  <groupId>com.github.jannikwibker</groupId>
+  <groupId>com.github.janinawibker</groupId>
   <artifactId>java-console</artifactId>
   <version>master-SNAPSHOT</version>
 </dependency>
